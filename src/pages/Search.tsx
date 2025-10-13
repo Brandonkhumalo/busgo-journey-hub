@@ -46,12 +46,19 @@ const Search = () => {
         .select(`
           *,
           route:routes(*)
-        `)
-        .ilike("route.from_city", `%${searchParams.from}%`)
-        .ilike("route.to_city", `%${searchParams.to}%`);
+        `);
 
       if (error) throw error;
-      return data as unknown as Bus[];
+      
+      // Filter on the client side since we have the route data
+      const filtered = (data as unknown as Bus[]).filter(bus => {
+        if (!bus.route) return false;
+        const fromMatch = bus.route.from_city.toLowerCase().includes(searchParams.from.toLowerCase());
+        const toMatch = bus.route.to_city.toLowerCase().includes(searchParams.to.toLowerCase());
+        return fromMatch && toMatch;
+      });
+      
+      return filtered;
     },
     enabled: hasSearched,
   });
@@ -168,9 +175,9 @@ const Search = () => {
                       <div className="flex items-center gap-4 text-sm">
                         <div className="flex items-center gap-2">
                           <MapPin className="h-4 w-4 text-primary" />
-                          <span className="font-medium">{bus.route.from_city}</span>
+                          <span className="font-medium">{bus.route?.from_city || 'N/A'}</span>
                           <span className="text-muted-foreground">→</span>
-                          <span className="font-medium">{bus.route.to_city}</span>
+                          <span className="font-medium">{bus.route?.to_city || 'N/A'}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Clock className="h-4 w-4 text-primary" />
