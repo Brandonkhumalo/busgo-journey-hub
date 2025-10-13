@@ -52,7 +52,8 @@ const Search = () => {
       
       // Filter on the client side since we have the route data
       const filtered = (data as unknown as Bus[]).filter(bus => {
-        if (!bus.route) return false;
+        // Extra defensive: ensure route exists and has required properties
+        if (!bus?.route?.from_city || !bus?.route?.to_city) return false;
         const fromMatch = bus.route.from_city.toLowerCase().includes(searchParams.from.toLowerCase());
         const toMatch = bus.route.to_city.toLowerCase().includes(searchParams.to.toLowerCase());
         return fromMatch && toMatch;
