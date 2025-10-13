@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Download, Calendar, MapPin, Clock, User } from "lucide-react";
+import { CheckCircle, Download, Calendar, MapPin, Clock, User, ArrowLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { QRCodeSVG } from "qrcode.react";
 
@@ -46,6 +46,15 @@ const Confirmation = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate("/dashboard")}
+          className="mb-4"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Dashboard
+        </Button>
         <Card className="max-w-2xl mx-auto shadow-[var(--shadow-card)]">
           <CardHeader className="text-center space-y-4">
             <div className="flex justify-center">

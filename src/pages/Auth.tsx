@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Bus } from "lucide-react";
+import { Bus, ArrowLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
 
 const authSchema = z.object({
@@ -97,7 +97,17 @@ const Auth = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="container mx-auto px-4 py-16 flex items-center justify-center">
-        <Card className="w-full max-w-md shadow-[var(--shadow-card)]">
+        <div className="w-full max-w-md">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate("/")}
+            className="mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Home
+          </Button>
+          <Card className="w-full shadow-[var(--shadow-card)]">
           <CardHeader className="space-y-1 text-center">
             <div className="flex justify-center mb-4">
               <div className="bg-primary p-3 rounded-xl">
@@ -193,6 +203,7 @@ const Auth = () => {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
     </div>
   );

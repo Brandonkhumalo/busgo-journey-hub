@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, MapPin, Clock, DollarSign } from "lucide-react";
+import { Calendar, MapPin, Clock, DollarSign, ArrowLeft } from "lucide-react";
 import { User } from "@supabase/supabase-js";
 
 const Dashboard = () => {
@@ -70,6 +70,15 @@ const Dashboard = () => {
       <Navbar />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate("/")}
+            className="mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Home
+          </Button>
           <h1 className="text-3xl font-bold">My Dashboard</h1>
           <p className="text-muted-foreground">Manage your bookings and travel history</p>
         </div>

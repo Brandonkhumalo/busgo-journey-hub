@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Search as SearchIcon, MapPin, Calendar, Clock, DollarSign } from "lucide-react";
+import { Search as SearchIcon, MapPin, Calendar, Clock, DollarSign, ArrowLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
@@ -85,6 +85,15 @@ const Search = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate("/")}
+          className="mb-4"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Home
+        </Button>
         <Card className="mb-8 shadow-[var(--shadow-card)]">
           <CardHeader>
             <CardTitle className="text-2xl flex items-center gap-2">

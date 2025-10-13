@@ -10,7 +10,7 @@ import { z } from "zod";
 import Navbar from "@/components/Navbar";
 import { useQuery } from "@tanstack/react-query";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { CreditCard } from "lucide-react";
+import { CreditCard, ArrowLeft } from "lucide-react";
 
 const passengerSchema = z.object({
   passengerName: z.string().min(2, "Name must be at least 2 characters"),
@@ -135,6 +135,15 @@ const Booking = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate(-1)}
+          className="mb-4"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back
+        </Button>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <Card className="shadow-[var(--shadow-card)]">
             <CardHeader>
