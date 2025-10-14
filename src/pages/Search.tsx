@@ -223,9 +223,11 @@ const Search = () => {
             {transportType === "bus" && (
               <>
                 <h2 className="text-2xl font-bold">
-                  {buses && buses.length > 0
-                    ? `Found ${buses.length} Available ${buses.length === 1 ? "Bus" : "Buses"}`
-                    : "No buses found"}
+                  {busesLoading 
+                    ? "Searching for buses..."
+                    : buses && buses.length > 0
+                      ? `Found ${buses.length} Available ${buses.length === 1 ? "Bus" : "Buses"}`
+                      : "No buses found"}
                 </h2>
                 {buses?.map((bus) => (
                   <Card key={bus.id} className="shadow-[var(--shadow-card)] hover:shadow-xl transition-shadow">
@@ -291,9 +293,11 @@ const Search = () => {
             {transportType === "flight" && (
               <>
                 <h2 className="text-2xl font-bold">
-                  {flights && flights.length > 0
-                    ? `Found ${flights.length} Available ${flights.length === 1 ? "Flight" : "Flights"}`
-                    : "No flights found"}
+                  {flightsLoading
+                    ? "Searching for flights..."
+                    : flights && flights.length > 0
+                      ? `Found ${flights.length} Available ${flights.length === 1 ? "Flight" : "Flights"}`
+                      : "No flights found"}
                 </h2>
                 {flights?.map((flight) => (
                   <Card key={flight.id} className="shadow-[var(--shadow-card)] hover:shadow-xl transition-shadow">
