@@ -17,12 +17,12 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    /* BusGo Brand Colors */
-    --primary: 214 85% 51%; /* #1A73E8 - BusGo Blue */
+    /* TicketGo Brand Colors */
+    --primary: 214 85% 51%; /* #1A73E8 - TicketGo Blue */
     --primary-foreground: 0 0% 100%;
     --primary-hover: 214 85% 45%;
 
-    --secondary: 48 100% 50%; /* #FFCC00 - BusGo Yellow */
+    --secondary: 48 100% 50%; /* #FFCC00 - TicketGo Yellow */
     --secondary-foreground: 222 47% 11%;
     --secondary-hover: 48 100% 45%;
 

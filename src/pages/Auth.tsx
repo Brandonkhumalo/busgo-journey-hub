@@ -119,7 +119,7 @@ const Auth = () => {
             </CardTitle>
             <CardDescription>
               {isLogin
-                ? "Sign in to your BusGo account"
+                ? "Sign in to your TicketGo account"
                 : "Sign up to start booking your journeys"}
             </CardDescription>
           </CardHeader>

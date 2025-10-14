@@ -10,7 +10,7 @@ import { z } from "zod";
 import Navbar from "@/components/Navbar";
 import { useQuery } from "@tanstack/react-query";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { CreditCard, ArrowLeft } from "lucide-react";
+import { CreditCard, ArrowLeft, Bus, Plane } from "lucide-react";
 
 const passengerSchema = z.object({
   passengerName: z.string().min(2, "Name must be at least 2 characters"),
@@ -20,11 +20,12 @@ const passengerSchema = z.object({
   nextOfKinPhone: z.string().min(10, "Next of kin phone must be at least 10 digits"),
 });
 
-const Booking = () => {
-  const { busId } = useParams();
+const BookingUnified = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const travelDate = searchParams.get("date");
+  const transportType = searchParams.get("type") as "bus" | "flight";
   const [selectedSeat, setSelectedSeat] = useState<string | null>(null);
   const [showPassengerForm, setShowPassengerForm] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
@@ -37,38 +38,41 @@ const Booking = () => {
     nextOfKinPhone: "",
   });
 
-  const { data: bus } = useQuery({
-    queryKey: ["bus", busId],
+  const { data: transport }: { data: any } = useQuery({
+    queryKey: [transportType, id],
     queryFn: async () => {
+      const table = transportType === "bus" ? "buses" : "flights";
       const { data, error } = await supabase
-        .from("buses")
+        .from(table as any)
         .select(`*, route:routes(*)`)
-        .eq("id", busId)
+        .eq("id", id as any)
         .single();
       if (error) throw error;
       return data;
     },
   });
 
-  const { data: seats, refetch: refetchSeats } = useQuery({
-    queryKey: ["seats", busId],
+  const { data: seats }: { data: any } = useQuery({
+    queryKey: ["seats", transportType, id],
     queryFn: async () => {
+      const table = transportType === "bus" ? "seats" : "flight_seats";
+      const idColumn = transportType === "bus" ? "bus_id" : "flight_id";
       const { data, error } = await supabase
-        .from("seats")
+        .from(table as any)
         .select("*")
-        .eq("bus_id", busId)
-        .order("seat_number");
+        .eq(idColumn, id as any)
+        .order("seat_number" as any);
       if (error) throw error;
       return data;
     },
   });
 
   useEffect(() => {
-    if (!travelDate) {
-      toast.error("Travel date is required");
+    if (!travelDate || !transportType) {
+      toast.error("Travel date and type are required");
       navigate("/search");
     }
-  }, [travelDate, navigate]);
+  }, [travelDate, transportType, navigate]);
 
   const handleSeatSelect = (seatId: string, isBooked: boolean) => {
     if (isBooked) {
@@ -91,18 +95,11 @@ const Booking = () => {
       const validatedData = passengerSchema.parse(formData);
       
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("Please sign in to complete booking");
-        navigate("/auth");
-        return;
-      }
 
-      const bookingReference = `BG${Date.now().toString().slice(-8)}`;
+      const bookingReference = `TG${Date.now().toString().slice(-8)}`;
 
-      const { error } = await supabase.from("bookings").insert({
-        user_id: user.id,
-        bus_id: busId,
-        seat_id: selectedSeat,
+      const bookingData: any = {
+        user_id: user?.id || null,
         booking_reference: bookingReference,
         passenger_name: validatedData.passengerName,
         passenger_id_number: validatedData.passengerId,
@@ -113,8 +110,18 @@ const Booking = () => {
         payment_method: paymentMethod as any,
         payment_status: "completed",
         status: "confirmed",
-        total_amount: bus?.price || 0,
-      });
+        total_amount: transport?.price || 0,
+      };
+
+      if (transportType === "bus") {
+        bookingData.bus_id = id;
+        bookingData.seat_id = selectedSeat;
+      } else {
+        bookingData.flight_id = id;
+        bookingData.flight_seat_id = selectedSeat;
+      }
+
+      const { error } = await supabase.from("bookings").insert(bookingData);
 
       if (error) throw error;
 
@@ -131,6 +138,14 @@ const Booking = () => {
     }
   };
 
+  const transportName = transportType === "bus" 
+    ? (transport as any)?.bus_name 
+    : (transport as any)?.airline_name;
+  
+  const transportNumber = transportType === "bus"
+    ? (transport as any)?.bus_number
+    : (transport as any)?.flight_number;
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -144,6 +159,15 @@ const Booking = () => {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
+        
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            {transportType === "bus" ? <Bus className="h-6 w-6 text-primary" /> : <Plane className="h-6 w-6 text-primary" />}
+            <h1 className="text-3xl font-bold">{transportName}</h1>
+          </div>
+          <p className="text-muted-foreground">{transportNumber}</p>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <Card className="shadow-[var(--shadow-card)]">
             <CardHeader>
@@ -283,7 +307,7 @@ const Booking = () => {
                   <div className="pt-4 space-y-2">
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total Amount:</span>
-                      <span className="text-primary">${bus?.price}</span>
+                      <span className="text-primary">${transport?.price}</span>
                     </div>
                     <Button type="submit" variant="hero" className="w-full" disabled={loading}>
                       {loading ? "Processing..." : "Confirm Booking"}
@@ -299,4 +323,4 @@ const Booking = () => {
   );
 };
 
-export default Booking;
+export default BookingUnified;

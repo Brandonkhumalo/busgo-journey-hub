@@ -17,8 +17,10 @@ export type Database = {
       bookings: {
         Row: {
           booking_reference: string
-          bus_id: string
+          bus_id: string | null
           created_at: string
+          flight_id: string | null
+          flight_seat_id: string | null
           id: string
           next_of_kin_name: string
           next_of_kin_phone: string
@@ -27,17 +29,19 @@ export type Database = {
           passenger_phone: string
           payment_method: string | null
           payment_status: string
-          seat_id: string
+          seat_id: string | null
           status: string
           total_amount: number
           travel_date: string
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           booking_reference: string
-          bus_id: string
+          bus_id?: string | null
           created_at?: string
+          flight_id?: string | null
+          flight_seat_id?: string | null
           id?: string
           next_of_kin_name: string
           next_of_kin_phone: string
@@ -46,17 +50,19 @@ export type Database = {
           passenger_phone: string
           payment_method?: string | null
           payment_status?: string
-          seat_id: string
+          seat_id?: string | null
           status?: string
           total_amount: number
           travel_date: string
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           booking_reference?: string
-          bus_id?: string
+          bus_id?: string | null
           created_at?: string
+          flight_id?: string | null
+          flight_seat_id?: string | null
           id?: string
           next_of_kin_name?: string
           next_of_kin_phone?: string
@@ -65,12 +71,12 @@ export type Database = {
           passenger_phone?: string
           payment_method?: string | null
           payment_status?: string
-          seat_id?: string
+          seat_id?: string | null
           status?: string
           total_amount?: number
           travel_date?: string
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -78,6 +84,20 @@ export type Database = {
             columns: ["bus_id"]
             isOneToOne: false
             referencedRelation: "buses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_flight_id_fkey"
+            columns: ["flight_id"]
+            isOneToOne: false
+            referencedRelation: "flights"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_flight_seat_id_fkey"
+            columns: ["flight_seat_id"]
+            isOneToOne: false
+            referencedRelation: "flight_seats"
             referencedColumns: ["id"]
           },
           {
@@ -132,6 +152,91 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "buses_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      flight_seats: {
+        Row: {
+          created_at: string
+          flight_id: string
+          id: string
+          is_booked: boolean
+          seat_class: string
+          seat_number: string
+        }
+        Insert: {
+          created_at?: string
+          flight_id: string
+          id?: string
+          is_booked?: boolean
+          seat_class?: string
+          seat_number: string
+        }
+        Update: {
+          created_at?: string
+          flight_id?: string
+          id?: string
+          is_booked?: boolean
+          seat_class?: string
+          seat_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flight_seats_flight_id_fkey"
+            columns: ["flight_id"]
+            isOneToOne: false
+            referencedRelation: "flights"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      flights: {
+        Row: {
+          airline_name: string
+          amenities: string[] | null
+          arrival_time: string
+          available_seats: number
+          created_at: string
+          departure_time: string
+          flight_number: string
+          id: string
+          price: number
+          route_id: string
+          total_seats: number
+        }
+        Insert: {
+          airline_name: string
+          amenities?: string[] | null
+          arrival_time: string
+          available_seats?: number
+          created_at?: string
+          departure_time: string
+          flight_number: string
+          id?: string
+          price: number
+          route_id: string
+          total_seats?: number
+        }
+        Update: {
+          airline_name?: string
+          amenities?: string[] | null
+          arrival_time?: string
+          available_seats?: number
+          created_at?: string
+          departure_time?: string
+          flight_number?: string
+          id?: string
+          price?: number
+          route_id?: string
+          total_seats?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flights_route_id_fkey"
             columns: ["route_id"]
             isOneToOne: false
             referencedRelation: "routes"

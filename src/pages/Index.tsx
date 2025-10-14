@@ -12,12 +12,12 @@ const Index = () => {
     {
       icon: Bus,
       title: "Wide Network",
-      description: "Travel to major cities across Zimbabwe with our extensive bus network",
+      description: "Travel to major cities across Zimbabwe with buses and flights",
     },
     {
       icon: Shield,
       title: "Safe & Secure",
-      description: "Your safety is our priority with licensed operators and modern buses",
+      description: "Your safety is our priority with licensed operators and modern transportation",
     },
     {
       icon: Clock,
@@ -34,7 +34,7 @@ const Index = () => {
   const testimonials = [
     {
       name: "Tendai Moyo",
-      comment: "BusGo made my journey from Harare to Bulawayo so convenient. The booking process was seamless!",
+      comment: "TicketGo made my journey from Harare to Bulawayo so convenient. The booking process was seamless!",
       rating: 5,
     },
     {
@@ -66,11 +66,11 @@ const Index = () => {
             <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
               Travel Smarter with{" "}
               <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                BusGo
+                TicketGo
               </span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
-              Book your bus tickets online in seconds. Safe, comfortable, and affordable travel across Zimbabwe.
+              Book bus and flight tickets online in seconds. Safe, comfortable, and affordable travel across Zimbabwe.
             </p>
             <div className="flex flex-wrap gap-4">
               <Button
@@ -98,9 +98,9 @@ const Index = () => {
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose BusGo?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose TicketGo?</h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              We make bus travel simple, safe, and convenient for everyone
+              We make travel simple, safe, and convenient for everyone
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -194,7 +194,7 @@ const Index = () => {
             Ready to Start Your Journey?
           </h2>
           <p className="text-primary-foreground/90 text-lg mb-8 max-w-2xl mx-auto">
-            Join thousands of satisfied travelers who trust BusGo for their bus travel needs
+            Join thousands of satisfied travelers who trust TicketGo for their travel needs
           </p>
           <Button
             variant="secondary"
@@ -210,7 +210,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="bg-muted py-8 border-t">
         <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p>&copy; 2025 BusGo. All rights reserved.</p>
+          <p>&copy; 2025 TicketGo. All rights reserved.</p>
           <p className="mt-2">Travel smarter, travel better.</p>
         </div>
       </footer>

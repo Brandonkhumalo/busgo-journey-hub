@@ -37,7 +37,7 @@ const Navbar = () => {
               <Bus className="h-6 w-6 text-primary-foreground" />
             </div>
             <span className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              BusGo
+              TicketGo
             </span>
           </Link>
 
