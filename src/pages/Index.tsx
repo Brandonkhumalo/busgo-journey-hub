@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bus, Shield, Clock, Wallet, Star, CheckCircle } from "lucide-react";
+import { Bus, Shield, Clock, Wallet, Star, CheckCircle, Ticket, Plane } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import heroImage from "@/assets/hero-bus.jpg";
 
@@ -11,40 +11,40 @@ const Index = () => {
   const features = [
     {
       icon: Bus,
-      title: "Wide Network",
-      description: "Travel to major cities across Zimbabwe with buses and flights",
+      title: "Bus Tickets",
+      description: "Travel comfortably between cities with our trusted bus operators",
     },
     {
-      icon: Shield,
-      title: "Safe & Secure",
-      description: "Your safety is our priority with licensed operators and modern transportation",
+      icon: Plane,
+      title: "Flight Tickets",
+      description: "Quick and convenient air travel across Zimbabwe",
     },
     {
-      icon: Clock,
-      title: "Real-time Booking",
-      description: "Book instantly and get immediate confirmation with QR code tickets",
+      icon: Ticket,
+      title: "Event Tickets",
+      description: "Get tickets for concerts, parties, conferences, and more",
     },
     {
       icon: Wallet,
-      title: "Multiple Payment Options",
-      description: "Pay with PayNow, EcoCash, InnBucks, or Omari - your choice",
+      title: "Easy Payments",
+      description: "Pay with PayNow, EcoCash, InnBucks, or Omari",
     },
   ];
 
   const testimonials = [
     {
       name: "Tendai Moyo",
-      comment: "TicketGo made my journey from Harare to Bulawayo so convenient. The booking process was seamless!",
+      comment: "TicketGo made my journey from Harare to Bulawayo so convenient. Now I also buy my concert tickets here!",
       rating: 5,
     },
     {
       name: "Chipo Ncube",
-      comment: "I love the seat selection feature. I can choose exactly where I want to sit before I travel.",
+      comment: "I booked flight tickets and event tickets on the same platform. So convenient!",
       rating: 5,
     },
     {
       name: "Takudzwa Mutasa",
-      comment: "Payment with EcoCash was instant. Great service and comfortable buses!",
+      comment: "Got tickets for the Summer Music Festival instantly. Payment with EcoCash was seamless!",
       rating: 5,
     },
   ];
@@ -64,13 +64,13 @@ const Index = () => {
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-2xl">
             <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-              Travel Smarter with{" "}
+              Your One-Stop{" "}
               <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                TicketGo
+                Ticket Platform
               </span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
-              Book bus and flight tickets online in seconds. Safe, comfortable, and affordable travel across Zimbabwe.
+              Book bus tickets, flight tickets, and event tickets all in one place. From travel to entertainment, we've got you covered.
             </p>
             <div className="flex flex-wrap gap-4">
               <Button
@@ -79,7 +79,7 @@ const Index = () => {
                 onClick={() => navigate("/search")}
                 className="text-lg"
               >
-                Book Your Journey
+                Book Tickets Now
               </Button>
               <Button
                 variant="outline"
@@ -98,9 +98,9 @@ const Index = () => {
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose TicketGo?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">What Can You Book?</h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              We make travel simple, safe, and convenient for everyone
+              From transportation to entertainment, book all your tickets in one place
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -194,7 +194,7 @@ const Index = () => {
             Ready to Start Your Journey?
           </h2>
           <p className="text-primary-foreground/90 text-lg mb-8 max-w-2xl mx-auto">
-            Join thousands of satisfied travelers who trust TicketGo for their travel needs
+            Join thousands who trust TicketGo for travel tickets and event tickets
           </p>
           <Button
             variant="secondary"
@@ -202,7 +202,7 @@ const Index = () => {
             onClick={() => navigate("/search")}
             className="text-lg shadow-xl hover:shadow-2xl"
           >
-            Book Your Trip Now
+            Get Your Tickets Now
           </Button>
         </div>
       </section>
@@ -211,7 +211,7 @@ const Index = () => {
       <footer className="bg-muted py-8 border-t">
         <div className="container mx-auto px-4 text-center text-muted-foreground">
           <p>&copy; 2025 TicketGo. All rights reserved.</p>
-          <p className="mt-2">Travel smarter, travel better.</p>
+          <p className="mt-2">Your all-in-one ticket platform.</p>
         </div>
       </footer>
     </div>

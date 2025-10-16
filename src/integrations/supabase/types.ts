@@ -19,6 +19,8 @@ export type Database = {
           booking_reference: string
           bus_id: string | null
           created_at: string
+          event_id: string | null
+          event_ticket_id: string | null
           flight_id: string | null
           flight_seat_id: string | null
           id: string
@@ -40,6 +42,8 @@ export type Database = {
           booking_reference: string
           bus_id?: string | null
           created_at?: string
+          event_id?: string | null
+          event_ticket_id?: string | null
           flight_id?: string | null
           flight_seat_id?: string | null
           id?: string
@@ -61,6 +65,8 @@ export type Database = {
           booking_reference?: string
           bus_id?: string | null
           created_at?: string
+          event_id?: string | null
+          event_ticket_id?: string | null
           flight_id?: string | null
           flight_seat_id?: string | null
           id?: string
@@ -84,6 +90,20 @@ export type Database = {
             columns: ["bus_id"]
             isOneToOne: false
             referencedRelation: "buses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_event_ticket_id_fkey"
+            columns: ["event_ticket_id"]
+            isOneToOne: false
+            referencedRelation: "event_tickets"
             referencedColumns: ["id"]
           },
           {
@@ -158,6 +178,86 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      event_tickets: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          is_booked: boolean
+          ticket_number: string
+          ticket_type: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          is_booked?: boolean
+          ticket_number: string
+          ticket_type?: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          is_booked?: boolean
+          ticket_number?: string
+          ticket_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_tickets_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          available_tickets: number
+          category: string
+          created_at: string
+          description: string
+          event_date: string
+          event_name: string
+          event_time: string
+          id: string
+          image_url: string | null
+          price: number
+          total_tickets: number
+          venue: string
+        }
+        Insert: {
+          available_tickets?: number
+          category?: string
+          created_at?: string
+          description: string
+          event_date: string
+          event_name: string
+          event_time: string
+          id?: string
+          image_url?: string | null
+          price: number
+          total_tickets?: number
+          venue: string
+        }
+        Update: {
+          available_tickets?: number
+          category?: string
+          created_at?: string
+          description?: string
+          event_date?: string
+          event_name?: string
+          event_time?: string
+          id?: string
+          image_url?: string | null
+          price?: number
+          total_tickets?: number
+          venue?: string
+        }
+        Relationships: []
       }
       flight_seats: {
         Row: {

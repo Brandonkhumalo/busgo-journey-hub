@@ -10,7 +10,7 @@ import { z } from "zod";
 import Navbar from "@/components/Navbar";
 import { useQuery } from "@tanstack/react-query";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { CreditCard, ArrowLeft, Bus, Plane } from "lucide-react";
+import { CreditCard, ArrowLeft, Bus, Plane, Ticket, Plus, Minus } from "lucide-react";
 
 const passengerSchema = z.object({
   passengerName: z.string().min(2, "Name must be at least 2 characters"),
@@ -25,8 +25,9 @@ const BookingUnified = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const travelDate = searchParams.get("date");
-  const transportType = searchParams.get("type") as "bus" | "flight";
+  const bookingType = searchParams.get("type") as "bus" | "flight" | "event";
   const [selectedSeat, setSelectedSeat] = useState<string | null>(null);
+  const [ticketQuantity, setTicketQuantity] = useState(1);
   const [showPassengerForm, setShowPassengerForm] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [loading, setLoading] = useState(false);
@@ -39,24 +40,36 @@ const BookingUnified = () => {
   });
 
   const { data: transport }: { data: any } = useQuery({
-    queryKey: [transportType, id],
+    queryKey: [bookingType, id],
     queryFn: async () => {
-      const table = transportType === "bus" ? "buses" : "flights";
-      const { data, error } = await supabase
-        .from(table as any)
-        .select(`*, route:routes(*)`)
-        .eq("id", id as any)
-        .single();
-      if (error) throw error;
-      return data;
+      if (bookingType === "event") {
+        const { data, error } = await supabase
+          .from("events")
+          .select("*")
+          .eq("id", id as any)
+          .single();
+        if (error) throw error;
+        return data;
+      } else {
+        const table = bookingType === "bus" ? "buses" : "flights";
+        const { data, error } = await supabase
+          .from(table as any)
+          .select(`*, route:routes(*)`)
+          .eq("id", id as any)
+          .single();
+        if (error) throw error;
+        return data;
+      }
     },
   });
 
   const { data: seats }: { data: any } = useQuery({
-    queryKey: ["seats", transportType, id],
+    queryKey: ["seats", bookingType, id],
     queryFn: async () => {
-      const table = transportType === "bus" ? "seats" : "flight_seats";
-      const idColumn = transportType === "bus" ? "bus_id" : "flight_id";
+      if (bookingType === "event") return null;
+      
+      const table = bookingType === "bus" ? "seats" : "flight_seats";
+      const idColumn = bookingType === "bus" ? "bus_id" : "flight_id";
       const { data, error } = await supabase
         .from(table as any)
         .select("*")
@@ -65,14 +78,19 @@ const BookingUnified = () => {
       if (error) throw error;
       return data;
     },
+    enabled: bookingType !== "event",
   });
 
   useEffect(() => {
-    if (!travelDate || !transportType) {
-      toast.error("Travel date and type are required");
+    if (bookingType !== "event" && !travelDate) {
+      toast.error("Travel date is required");
       navigate("/search");
     }
-  }, [travelDate, transportType, navigate]);
+    if (!bookingType) {
+      toast.error("Booking type is required");
+      navigate("/search");
+    }
+  }, [travelDate, bookingType, navigate]);
 
   const handleSeatSelect = (seatId: string, isBooked: boolean) => {
     if (isBooked) {
@@ -85,9 +103,17 @@ const BookingUnified = () => {
 
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedSeat || !paymentMethod) {
-      toast.error("Please select a seat and payment method");
-      return;
+    
+    if (bookingType === "event") {
+      if (!paymentMethod || ticketQuantity < 1) {
+        toast.error("Please select payment method and ticket quantity");
+        return;
+      }
+    } else {
+      if (!selectedSeat || !paymentMethod) {
+        toast.error("Please select a seat and payment method");
+        return;
+      }
     }
 
     setLoading(true);
@@ -96,37 +122,80 @@ const BookingUnified = () => {
       
       const { data: { user } } = await supabase.auth.getUser();
 
-      const bookingReference = `TG${Date.now().toString().slice(-8)}`;
+      if (bookingType === "event") {
+        // For events, create multiple bookings
+        const bookings = [];
+        for (let i = 0; i < ticketQuantity; i++) {
+          const bookingReference = `TG${Date.now().toString().slice(-8)}${i}`;
+          
+          // Get available ticket
+          const { data: availableTickets, error: ticketError } = await supabase
+            .from("event_tickets")
+            .select("*")
+            .eq("event_id", id)
+            .eq("is_booked", false)
+            .limit(1);
 
-      const bookingData: any = {
-        user_id: user?.id || null,
-        booking_reference: bookingReference,
-        passenger_name: validatedData.passengerName,
-        passenger_id_number: validatedData.passengerId,
-        passenger_phone: validatedData.passengerPhone,
-        next_of_kin_name: validatedData.nextOfKinName,
-        next_of_kin_phone: validatedData.nextOfKinPhone,
-        travel_date: travelDate,
-        payment_method: paymentMethod as any,
-        payment_status: "completed",
-        status: "confirmed",
-        total_amount: transport?.price || 0,
-      };
+          if (ticketError || !availableTickets || availableTickets.length === 0) {
+            throw new Error("No tickets available");
+          }
 
-      if (transportType === "bus") {
-        bookingData.bus_id = id;
-        bookingData.seat_id = selectedSeat;
+          bookings.push({
+            user_id: user?.id || null,
+            booking_reference: bookingReference,
+            passenger_name: validatedData.passengerName,
+            passenger_id_number: validatedData.passengerId,
+            passenger_phone: validatedData.passengerPhone,
+            next_of_kin_name: validatedData.nextOfKinName,
+            next_of_kin_phone: validatedData.nextOfKinPhone,
+            travel_date: (transport as any)?.event_date,
+            payment_method: paymentMethod as any,
+            payment_status: "completed",
+            status: "confirmed",
+            total_amount: transport?.price || 0,
+            event_id: id,
+            event_ticket_id: availableTickets[0].id,
+          });
+        }
+
+        const { error } = await supabase.from("bookings").insert(bookings);
+        if (error) throw error;
+
+        toast.success(`${ticketQuantity} ticket${ticketQuantity > 1 ? 's' : ''} booked successfully!`);
+        navigate(`/confirmation/${bookings[0].booking_reference}`);
       } else {
-        bookingData.flight_id = id;
-        bookingData.flight_seat_id = selectedSeat;
+        // Original bus/flight booking
+        const bookingReference = `TG${Date.now().toString().slice(-8)}`;
+
+        const bookingData: any = {
+          user_id: user?.id || null,
+          booking_reference: bookingReference,
+          passenger_name: validatedData.passengerName,
+          passenger_id_number: validatedData.passengerId,
+          passenger_phone: validatedData.passengerPhone,
+          next_of_kin_name: validatedData.nextOfKinName,
+          next_of_kin_phone: validatedData.nextOfKinPhone,
+          travel_date: travelDate,
+          payment_method: paymentMethod as any,
+          payment_status: "completed",
+          status: "confirmed",
+          total_amount: transport?.price || 0,
+        };
+
+        if (bookingType === "bus") {
+          bookingData.bus_id = id;
+          bookingData.seat_id = selectedSeat;
+        } else {
+          bookingData.flight_id = id;
+          bookingData.flight_seat_id = selectedSeat;
+        }
+
+        const { error } = await supabase.from("bookings").insert(bookingData);
+        if (error) throw error;
+
+        toast.success("Booking confirmed!");
+        navigate(`/confirmation/${bookingReference}`);
       }
-
-      const { error } = await supabase.from("bookings").insert(bookingData);
-
-      if (error) throw error;
-
-      toast.success("Booking confirmed!");
-      navigate(`/confirmation/${bookingReference}`);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
@@ -138,13 +207,17 @@ const BookingUnified = () => {
     }
   };
 
-  const transportName = transportType === "bus" 
-    ? (transport as any)?.bus_name 
-    : (transport as any)?.airline_name;
+  const displayName = bookingType === "event" 
+    ? (transport as any)?.event_name
+    : bookingType === "bus" 
+      ? (transport as any)?.bus_name 
+      : (transport as any)?.airline_name;
   
-  const transportNumber = transportType === "bus"
-    ? (transport as any)?.bus_number
-    : (transport as any)?.flight_number;
+  const displayNumber = bookingType === "event"
+    ? (transport as any)?.venue
+    : bookingType === "bus"
+      ? (transport as any)?.bus_number
+      : (transport as any)?.flight_number;
 
   return (
     <div className="min-h-screen bg-background">
@@ -162,57 +235,119 @@ const BookingUnified = () => {
         
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2">
-            {transportType === "bus" ? <Bus className="h-6 w-6 text-primary" /> : <Plane className="h-6 w-6 text-primary" />}
-            <h1 className="text-3xl font-bold">{transportName}</h1>
+            {bookingType === "bus" ? <Bus className="h-6 w-6 text-primary" /> : bookingType === "flight" ? <Plane className="h-6 w-6 text-primary" /> : <Ticket className="h-6 w-6 text-primary" />}
+            <h1 className="text-3xl font-bold">{displayName}</h1>
           </div>
-          <p className="text-muted-foreground">{transportNumber}</p>
+          <p className="text-muted-foreground">{displayNumber}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <Card className="shadow-[var(--shadow-card)]">
-            <CardHeader>
-              <CardTitle>Select Your Seat</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-center gap-6 text-sm mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-muted rounded border-2"></div>
-                    <span>Available</span>
+          {bookingType === "event" ? (
+            <Card className="shadow-[var(--shadow-card)]">
+              <CardHeader>
+                <CardTitle>Event Details</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <p className="text-muted-foreground">{(transport as any)?.description}</p>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Date:</span>
+                      <span className="font-medium">{new Date((transport as any)?.event_date).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Time:</span>
+                      <span className="font-medium">{(transport as any)?.event_time}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Category:</span>
+                      <span className="font-medium capitalize">{(transport as any)?.category}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Available Tickets:</span>
+                      <span className="font-medium">{(transport as any)?.available_tickets}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-primary text-primary-foreground rounded border-2 flex items-center justify-center">✓</div>
-                    <span>Selected</span>
+                  
+                  <div className="pt-4 border-t">
+                    <Label className="mb-2 block">Number of Tickets</Label>
+                    <div className="flex items-center gap-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setTicketQuantity(Math.max(1, ticketQuantity - 1))}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                      <span className="text-2xl font-bold w-12 text-center">{ticketQuantity}</span>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setTicketQuantity(Math.min((transport as any)?.available_tickets || 1, ticketQuantity + 1))}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-muted-foreground/20 rounded border-2"></div>
-                    <span>Booked</span>
+
+                  <Button 
+                    variant="hero" 
+                    className="w-full"
+                    onClick={() => setShowPassengerForm(true)}
+                  >
+                    Continue to Booking
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="shadow-[var(--shadow-card)]">
+              <CardHeader>
+                <CardTitle>Select Your Seat</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-center gap-6 text-sm mb-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-muted rounded border-2"></div>
+                      <span>Available</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-primary text-primary-foreground rounded border-2 flex items-center justify-center">✓</div>
+                      <span>Selected</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-muted-foreground/20 rounded border-2"></div>
+                      <span>Booked</span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2 max-w-md mx-auto">
+                    {seats?.map((seat) => (
+                      <button
+                        key={seat.id}
+                        onClick={() => handleSeatSelect(seat.id, seat.is_booked)}
+                        disabled={seat.is_booked}
+                        className={`
+                          h-12 rounded border-2 font-medium transition-all
+                          ${
+                            seat.is_booked
+                              ? "bg-muted-foreground/20 cursor-not-allowed"
+                              : selectedSeat === seat.id
+                              ? "bg-primary text-primary-foreground border-primary"
+                              : "bg-muted hover:bg-muted/80 border-border"
+                          }
+                        `}
+                      >
+                        {seat.seat_number}
+                      </button>
+                    ))}
                   </div>
                 </div>
-                <div className="grid grid-cols-4 gap-2 max-w-md mx-auto">
-                  {seats?.map((seat) => (
-                    <button
-                      key={seat.id}
-                      onClick={() => handleSeatSelect(seat.id, seat.is_booked)}
-                      disabled={seat.is_booked}
-                      className={`
-                        h-12 rounded border-2 font-medium transition-all
-                        ${
-                          seat.is_booked
-                            ? "bg-muted-foreground/20 cursor-not-allowed"
-                            : selectedSeat === seat.id
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-muted hover:bg-muted/80 border-border"
-                        }
-                      `}
-                    >
-                      {seat.seat_number}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
 
           {showPassengerForm && (
             <Card className="shadow-[var(--shadow-card)]">
@@ -307,7 +442,12 @@ const BookingUnified = () => {
                   <div className="pt-4 space-y-2">
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total Amount:</span>
-                      <span className="text-primary">${transport?.price}</span>
+                      <span className="text-primary">
+                        ${bookingType === "event" 
+                          ? ((transport?.price || 0) * ticketQuantity).toFixed(2)
+                          : transport?.price
+                        }
+                      </span>
                     </div>
                     <Button type="submit" variant="hero" className="w-full" disabled={loading}>
                       {loading ? "Processing..." : "Confirm Booking"}
