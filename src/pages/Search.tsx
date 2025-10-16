@@ -137,7 +137,7 @@ const Search = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchParams.from || !searchParams.to || !searchParams.date) {
+    if (ticketType !== "event" && (!searchParams.from || !searchParams.to || !searchParams.date)) {
       toast.error("Please fill in all search fields");
       return;
     }
